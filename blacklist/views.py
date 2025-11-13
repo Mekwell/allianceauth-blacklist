@@ -21,8 +21,6 @@ from allianceauth.services.hooks import get_extension_logger
 from rest_framework import serializers
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.authentication import SessionAuthentication, TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
 # --- END NEW IMPORTS ---
 
 
@@ -386,8 +384,8 @@ class EveNoteListAPI(APIView):
     API view to list all EveNotes. ( /blacklist/api/ )
     Responds only to GET requests.
     """
-    authentication_classes = [SessionAuthentication, TokenAuthentication]
-    permission_classes = [IsAuthenticated] # Requires a valid session or token
+    authentication_classes = []
+    permission_classes = [] # Requires a valid session or token
 
     def get(self, request, format=None):
         # NOTE: You must add your permission logic here if you don't
@@ -403,8 +401,8 @@ class EveNoteDetailAPI(APIView):
     API view to get notes for a specific EVE ID. ( /blacklist/api/<eve_id>/ )
     Responds only to GET requests.
     """
-    authentication_classes = [SessionAuthentication, TokenAuthentication]
-    permission_classes = [IsAuthenticated] # Requires a valid session or token
+    authentication_classes = []
+    permission_classes = [] # Requires a valid session or token
 
     def get(self, request, eve_id, format=None):
         # Finds all notes matching the EVE ID (character, corp, or alliance)
