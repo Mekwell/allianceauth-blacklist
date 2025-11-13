@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 from . import apiviews
 
 app_name = 'blacklist_api'
