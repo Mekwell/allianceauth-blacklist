@@ -37,6 +37,8 @@ classifiers = [
 ]
 dependencies = [
     "allianceauth>=3.0.0,<5.0.0",
+    "djangorestframework",
+    "django-filter",
 ]
 
 [project.optional-dependencies]

@@ -1,10 +1,11 @@
-from django.urls import path
+from django.urls import path, include
 from django.urls import re_path
 from . import views
 
 app_name = 'blacklist'
 
 urlpatterns = [
+    path('api/', include('blacklist.api_urls')),
     path('set/', views.blacklist_set_search_character, name='set'),
     path('notes/', views.note_board, name='note_board'),
     path('blacklist/', views.blacklist, name='blacklist'),
