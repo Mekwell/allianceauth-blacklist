@@ -1,17 +1,16 @@
 from rest_framework import generics
-from .authentication import CustomTokenAuthentication
 from .models import EveNote
 from .serializers import EveNoteSerializer
 
 class EveNoteList(generics.ListAPIView):
     queryset = EveNote.objects.filter(blacklisted=True)
     serializer_class = EveNoteSerializer
-    authentication_classes = [CustomTokenAuthentication]
-    permission_classes = []  # No permissions required, only a valid token
+    authentication_classes = []  # No authentication required
+    permission_classes = []  # No permissions required
 
 class EveNoteRetrieve(generics.RetrieveAPIView):
     queryset = EveNote.objects.filter(blacklisted=True)
     serializer_class = EveNoteSerializer
-    authentication_classes = [CustomTokenAuthentication]
-    permission_classes = []  # No permissions required, only a valid token
+    authentication_classes = []  # No authentication required
+    permission_classes = []  # No permissions required
     lookup_field = 'eve_id'
