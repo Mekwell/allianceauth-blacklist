@@ -36,3 +36,39 @@ Comments | add_new_eve_note_restricted_comments | Can add new restricted comment
 ## Contributing
 
 Make sure you have signed the [License Agreement](https://developers.eveonline.com/resource/license-agreement) by logging in at <https://developers.eveonline.com> before submitting any pull requests. All bug fixes or features must not include extra superfluous formatting changes.
+
+## API
+
+This app provides a read-only API for accessing the blacklist.
+
+### Setup
+
+1.  Add `rest_framework` and `rest_framework.authtoken` to your `INSTALLED_APPS` in `local.py`:
+    ```python
+    INSTALLED_APPS = [
+        ...
+        'rest_framework',
+        'rest_framework.authtoken',
+        'blacklist',
+        ...
+    ]
+    ```
+2.  Run migrations:
+    ```bash
+    python manage.py migrate
+    ```
+3.  Generate a token for an admin user in the Alliance Auth admin panel under "Tokens".
+
+### Usage
+
+The API is accessible at `/blacklist/api/`. It is read-only and requires an admin token for authentication.
+
+**Get all blacklisted notes:**
+```bash
+curl -X GET http://YOUR_ALLIANCE_AUTH_URL/blacklist/api/ -H "Authorization: Token YOUR_ADMIN_TOKEN"
+```
+
+**Get a specific blacklisted note by `eve_id`:**
+```bash
+curl -X GET http://YOUR_ALLIANCE_AUTH_URL/blacklist/api/EVE_ID/ -H "Authorization: Token YOUR_ADMIN_TOKEN"
+```
