@@ -42,7 +42,7 @@ def register_menu() -> BlacklistMenu:
 
 @hooks.register('url_hook')
 def register_url() -> UrlHook:
-    return UrlHook(urls, 'blacklist', r'^blacklist/')
+    return UrlHook(urls, 'blacklist', r'^blacklist/', excluded_views=['blacklist_api:note_list', 'blacklist_api:note_retrieve'])
 
 
 @hooks.register("secure_group_filters")
