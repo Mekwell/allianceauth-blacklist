@@ -1,20 +1,30 @@
+# In blacklist/urls.py
+
 from django.urls import path, include
-from django.urls import re_path
+# from django.urls import re_path  # No longer needed, we can use path
 from . import views
 
 app_name = 'blacklist'
 
 urlpatterns = [
-    path('api/', include('blacklist.api_urls')),
+    # --- API URLS ---
+    # Points to the new EveNoteListAPI class in views.py
+    path('api/', views.EveNoteListAPI.as_view(), name='api_note_list'), 
+    # Points to the new EveNoteDetailAPI class in views.py
+    path('api/<int:eve_id>/', views.EveNoteDetailAPI.as_view(), name='api_note_detail'),
+
+    # --- YOUR EXISTING APP URLS (Updated to 'path') ---
     path('set/', views.blacklist_set_search_character, name='set'),
     path('notes/', views.note_board, name='note_board'),
     path('blacklist/', views.blacklist, name='blacklist'),
-    re_path(r'^get_add_note/(?P<eve_id>(\d)*)/$', views.get_add_evenote, name='modal_add'),
-    re_path(r'^get_comments/(?P<evenote_id>(\d)*)/$', views.get_evenote_comments, name='modal_comment'),
-    re_path(r'^get_edit_note/(?P<evenote_id>(\d)*)/$', views.get_edit_evenote, name='modal_edit'),
-    re_path(r'^get_add_comment/(?P<evenote_id>(\d)*)/$', views.get_add_comment, name='modal_add_comment'),
     path('search_names/', views.search_names, name='search_names'),
-    re_path(r'^add_comment/(?P<note_id>(\d)*)/$', views.add_comment, name='add_comment'),
-    re_path(r'^add_note/(?P<eve_id>(\d)*)/$', views.add_note, name='add_note'),
-    re_path(r'^edit_note/(?P<note_id>(\d)*)/$', views.edit_note, name='edit_note'),
+
+    # Modal/Action URLs
+    path('get_add_note/<int:eve_id>/', views.get_add_evenote, name='modal_add'),
+    path('get_comments/<int:evenote_id>/', views.get_evenote_comments, name='modal_comment'),
+    path('get_edit_note/<int:evenote_id>/', views.get_edit_evenote, name='modal_edit'),
+    path('get_add_comment/<int:evenote_id>/', views.get_add_comment, name='modal_add_comment'),
+    path('add_comment/<int:note_id>/', views.add_comment, name='add_comment'),
+    path('add_note/<int:eve_id>/', views.add_note, name='add_note'),
+    path('edit_note/<int:note_id>/', views.edit_note, name='edit_note'),
 ]

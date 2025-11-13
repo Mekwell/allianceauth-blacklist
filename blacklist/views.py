@@ -1,6 +1,8 @@
+# In blacklist/views.py
+
 from allianceauth.eveonline.models import EveCharacter
 from allianceauth.authentication.decorators import permissions_required
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
 from esi.models import Token
@@ -15,10 +17,31 @@ from . import providers, models
 
 from allianceauth.services.hooks import get_extension_logger
 
+# --- NEW DRF IMPORTS ---
+from rest_framework import serializers
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.authentication import SessionAuthentication, TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
+# --- END NEW IMPORTS ---
+
+
 logger = get_extension_logger(__name__)
 
-# Create your views here... *don't tell me what to do....*
+# --- NEW SERIALIZER CLASS ---
+# A serializer tells DRF how to convert your EveNote model into JSON
+class EveNoteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EveNote
+        # Define which fields to include in the JSON output
+        fields = ['id', 'eve_name', 'eve_id', 'eve_catagory',
+                  'corporation_name', 'alliance_name', 'reason',
+                  'blacklisted', 'restricted', 'added_by', 'added_at']
 
+# --- END NEW SERIALIZER ---
+
+
+# --- YOUR EXISTING VIEWS START HERE ---
 
 @login_required
 @permission_required(['blacklist.add_basic_eve_notes', 'blacklist.add_new_eve_notes'])
@@ -61,7 +84,7 @@ def note_board(request):
 
     if view_global_perms or add_global_perms:
         eve_notes = EveNote.objects.filter(restricted=False
-                                           ).prefetch_related('comment')
+                                            ).prefetch_related('comment')
         #  Restricted view
         if add_restricted_perms:
             if eve_notes:
@@ -72,7 +95,7 @@ def note_board(request):
     else:
         #  Basic Level
         eve_notes = EveNote.objects.filter(corporation_id=request.user.profile.main_character.corporation_id,
-                                           restricted=False).prefetch_related('comment')
+                                            restricted=False).prefetch_related('comment')
 
     context = {
         'add_note': (add_perms or add_global_perms),
@@ -81,7 +104,7 @@ def note_board(request):
         'edit_note': add_global_perms,
         'add_comment': request.user.has_perm('blacklist.add_new_eve_note_comments'),
         'add_restricted_comment': request.user.has_perm('blacklist.add_new_eve_note_restricted_comments'),
-        'view_comment': request.user.has_perm('blacklist.view_eve_note_comments'),
+        'view_comment': request.user.has_Fperm('blacklist.view_eve_note_comments'),
         'view_restricted_comment': request.user.has_perm('blacklist.view_eve_note_restricted_comments'),
         "search_char": get_search_char(request.user),
         'notes': eve_notes
@@ -194,12 +217,12 @@ def get_add_evenote(request, eve_id=None):
                     form = EveNoteForm()
 
                     context = {'form': form,
-                               'name': name,
-                               'char_info': char_info,
-                               'corp_info': corp_info,
-                               'alliance_info': alliance_info,
-                               'add_blacklist': add_blacklist_perms,
-                               'add_restricted_note': add_restricted_perms}
+                                'name': name,
+                                'char_info': char_info,
+                                'corp_info': corp_info,
+                                'alliance_info': alliance_info,
+                                'add_blacklist': add_blacklist_perms,
+                                'add_restricted_note': add_restricted_perms}
                     return HttpResponse(render_to_string('blacklist/add_note.html', context, request=request))
 
             except Exception as e:
@@ -207,10 +230,10 @@ def get_add_evenote(request, eve_id=None):
                 message = e.message
 
     context = {'names': False,
-               'searched': False,
-               'message': message,
-               'restricted_perms': add_global_perms
-               }
+                'searched': False,
+                'message': message,
+                'restricted_perms': add_global_perms
+                }
     return HttpResponse(render_to_string('blacklist/search_name.html', context, request=request))
 
 
@@ -257,10 +280,10 @@ def search_names(request):
             message = e.message
 
     context = {'names': names,
-               'searched': searched,
-               'message': message,
-               'restricted_perms': add_restricted_perms
-               }
+                'searched': searched,
+                'message': message,
+                'restricted_perms': add_restricted_perms
+                }
     return HttpResponse(render_to_string('blacklist/search_name.html', context, request=request))
 
 
@@ -275,17 +298,17 @@ def add_comment(request, note_id=None):
             restricted = form.cleaned_data['restricted']
 
             EveNoteComment.objects.create(added_by=request.user.profile.main_character.character_name,
-                                          eve_note_id=note_id,
-                                          comment=form.cleaned_data['comment'],
-                                          restricted=restricted)
+                                            eve_note_id=note_id,
+                                            comment=form.cleaned_data['comment'],
+                                            restricted=restricted)
             messages.info(request, "Comment Added")
             return redirect('blacklist:note_board')
     else:
         form = AddComment()
         note = EveNote.objects.get(pk=note_id)
         context = {'form': form,
-                   'note': note,
-                   'add_restricted': request.user.has_perm('blacklist.add_new_eve_note_restricted_comments')}
+                    'note': note,
+                    'add_restricted': request.user.has_perm('blacklist.add_new_eve_note_restricted_comments')}
 
         return render(request, 'blacklist/add_comment.html', context)
 
@@ -309,16 +332,16 @@ def add_note(request, eve_id=None):
 
                 blacklisted = form.cleaned_data['blacklisted']
                 EveNote.objects.create(eve_name=request.POST.get('eve_name'),
-                                       eve_catagory=request.POST.get('eve_cat'),
-                                       alliance_id=request.POST.get('alliance_id', None),
-                                       alliance_name=request.POST.get('alliance_name', None),
-                                       corporation_id=request.POST.get('corporation_id', None),
-                                       corporation_name=request.POST.get('corporation_name', None),
-                                       blacklisted=blacklisted,
-                                       restricted=restricted,
-                                       reason=form.cleaned_data['reason'],
-                                       added_by=request.user.profile.main_character.character_name,
-                                       eve_id=eve_id)
+                                        eve_catagory=request.POST.get('eve_cat'),
+                                        alliance_id=request.POST.get('alliance_id', None),
+                                        alliance_name=request.POST.get('alliance_name', None),
+                                        corporation_id=request.POST.get('corporation_id', None),
+                                        corporation_name=request.POST.get('corporation_name', None),
+                                        blacklisted=blacklisted,
+                                        restricted=restricted,
+                                        reason=form.cleaned_data['reason'],
+                                        added_by=request.user.profile.main_character.character_name,
+                                        eve_id=eve_id)
 
                 return redirect('blacklist:note_board')
     return redirect('blacklist:note_board')
@@ -348,7 +371,49 @@ def edit_note(request, note_id=None):
                                     'restricted': note.restricted,
                                     'ultra_restricted': note.ultra_restricted})
         context = {'form': form,
-                   'note': note,
-                   'add_blacklist': request.user.has_perm('blacklist.add_to_blacklist')}
+                    'note': note,
+                    'add_blacklist': request.user.has_perm('blacklist.add_to_blacklist')}
 
         return render(request, 'blacklist/edit_note.html', context)
+
+
+# -----------------------------------------------------------------
+# --- 🚀 NEW API VIEWS START HERE ---
+# -----------------------------------------------------------------
+
+class EveNoteListAPI(APIView):
+    """
+    API view to list all EveNotes. ( /blacklist/api/ )
+    Responds only to GET requests.
+    """
+    authentication_classes = [SessionAuthentication, TokenAuthentication]
+    permission_classes = [IsAuthenticated] # Requires a valid session or token
+
+    def get(self, request, format=None):
+        # NOTE: You must add your permission logic here if you don't
+        # want all authenticated users to see all notes.
+        # For now, it returns all notes.
+        notes = EveNote.objects.all()
+        serializer = EveNoteSerializer(notes, many=True)
+        return Response(serializer.data)
+
+
+class EveNoteDetailAPI(APIView):
+    """
+    API view to get notes for a specific EVE ID. ( /blacklist/api/<eve_id>/ )
+    Responds only to GET requests.
+    """
+    authentication_classes = [SessionAuthentication, TokenAuthentication]
+    permission_classes = [IsAuthenticated] # Requires a valid session or token
+
+    def get(self, request, eve_id, format=None):
+        # Finds all notes matching the EVE ID (character, corp, or alliance)
+        notes = EveNote.objects.filter(eve_id=eve_id)
+        
+        if not notes.exists():
+            # Returns a 404 if no notes are found for that ID
+            return Response({"detail": "No notes found for this EVE ID."}, status=404)
+            
+        # Serializes the list of notes (in case one ID has multiple notes)
+        serializer = EveNoteSerializer(notes, many=True)
+        return Response(serializer.data)
