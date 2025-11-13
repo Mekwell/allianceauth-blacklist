@@ -1,11 +1,13 @@
-from django.urls import path, include
+from django.urls import path
 from django.urls import re_path
 from . import views
+from . import apiviews # Added this import
 
 app_name = 'blacklist'
 
 urlpatterns = [
-    path('api/', include('blacklist.api_urls')),
+    path('api/', apiviews.EveNoteList.as_view(), name='api_note_list'), # Moved from api_urls.py
+    path('api/<int:eve_id>/', apiviews.EveNoteRetrieve.as_view(), name='api_note_retrieve'), # Moved from api_urls.py
     path('set/', views.blacklist_set_search_character, name='set'),
     path('notes/', views.note_board, name='note_board'),
     path('blacklist/', views.blacklist, name='blacklist'),
