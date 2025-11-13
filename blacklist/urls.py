@@ -8,10 +8,7 @@ app_name = 'blacklist'
 
 urlpatterns = [
     # --- API URLS ---
-    # Points to the new EveNoteListAPI class in views.py
-    path('api/', views.EveNoteListAPI.as_view(), name='api_note_list'), 
-    # Points to the new EveNoteDetailAPI class in views.py
-    path('api/<int:eve_id>/', views.EveNoteDetailAPI.as_view(), name='api_note_detail'),
+    path('api/', include('blacklist.api_urls')),
 
     # --- YOUR EXISTING APP URLS (Updated to 'path') ---
     path('set/', views.blacklist_set_search_character, name='set'),
