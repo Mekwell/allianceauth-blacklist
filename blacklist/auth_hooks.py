@@ -42,7 +42,7 @@ def register_menu() -> BlacklistMenu:
 
 @hooks.register('url_hook')
 def register_url() -> UrlHook:
-    return UrlHook(urls, 'blacklist', r'^blacklist/', excluded_views=['blacklist:api_note_list', 'blacklist:api_note_retrieve'])
+    return UrlHook(urls, 'blacklist', r'^blacklist/', excluded_views=['blacklist.apiviews.EveNoteList', 'blacklist.apiviews.EveNoteRetrieve'])
 
 
 @hooks.register("secure_group_filters")
