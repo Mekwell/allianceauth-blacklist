@@ -22,7 +22,7 @@ from rest_framework import serializers
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny
 # --- END NEW IMPORTS ---
 
 
@@ -387,7 +387,7 @@ class EveNoteListAPI(APIView):
     Responds only to GET requests.
     """
     authentication_classes = [SessionAuthentication, TokenAuthentication]
-    permission_classes = [IsAuthenticated] # Requires a valid session or token
+    permission_classes = [AllowAny] # Requires a valid session or token
 
     def get(self, request, format=None):
         # NOTE: You must add your permission logic here if you don't
@@ -404,7 +404,7 @@ class EveNoteDetailAPI(APIView):
     Responds only to GET requests.
     """
     authentication_classes = [SessionAuthentication, TokenAuthentication]
-    permission_classes = [IsAuthenticated] # Requires a valid session or token
+    permission_classes = [AllowAny] # Requires a valid session or token
 
     def get(self, request, eve_id, format=None):
         # Finds all notes matching the EVE ID (character, corp, or alliance)
